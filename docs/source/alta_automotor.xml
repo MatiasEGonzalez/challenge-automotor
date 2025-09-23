@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Form Name="ALTA_AUTOMOTOR" Version="10g">
+  <Blocks>
+    <Block Name="AUTOMOTOR" DataSourceName="Automotores">
+      <Items>
+        <Item Name="DOMINIO" Datatype="CHAR" Length="8" Required="true" Prompt="Dominio"/>
+        <Item Name="NUMERO_CHASIS" Datatype="CHAR" Length="25" Required="false" Prompt="N° Chasis"/>
+        <Item Name="NUMERO_MOTOR" Datatype="CHAR" Length="25" Required="false" Prompt="N° Motor"/>
+        <Item Name="COLOR" Datatype="CHAR" Length="40" Required="false" Prompt="Color"/>
+        <Item Name="FECHA_FABRICACION" Datatype="NUMBER" Length="6" Required="true" Prompt="YYYYMM Fabricación"/>
+        <Item Name="CUIT_DUENIO" Datatype="CHAR" Length="11" Required="true" Prompt="CUIT Dueño"/>
+        <Item Name="DENOM_DUENIO" Datatype="CHAR" Length="160" Required="false" Prompt="Nombre Dueño" Enabled="false"/>
+        <Item Name="BTN_SAVE" ItemType="BUTTON" Label="Guardar/Alta"/>
+        <Item Name="BTN_UPDATE" ItemType="BUTTON" Label="Actualizar"/>
+        <Item Name="BTN_DELETE" ItemType="BUTTON" Label="Eliminar"/>
+        <Item Name="BTN_LIST" ItemType="BUTTON" Label="Listar"/>
+      </Items>
+
+      <Triggers>
+        <Trigger Name="WHEN-VALIDATE-ITEM" Item="DOMINIO" FireInQuery="false" DisplayInKeyboardHelp="true"
+          TriggerText="BEGIN&#10;  PCK_AUTOMOTOR.validar_dominio(:AUTOMOTOR.DOMINIO);&#10;END;"/>
+        <Trigger Name="WHEN-VALIDATE-ITEM" Item="CUIT_DUENIO" FireInQuery="false" DisplayInKeyboardHelp="true"
+          TriggerText="BEGIN&#10;  IF NOT PCK_AUTOMOTOR.es_cuit_valido(:AUTOMOTOR.CUIT_DUENIO) THEN&#10;    message('CUIT inv&#225;lido');&#10;    RAISE FORM_TRIGGER_FAILURE;&#10;  END IF;&#10;  :AUTOMOTOR.DENOM_DUENIO := PCK_AUTOMOTOR.obtener_denominacion(:AUTOMOTOR.CUIT_DUENIO);&#10;  IF :AUTOMOTOR.DENOM_DUENIO IS NULL THEN&#10;    message('No existe Sujeto con ese CUIT');&#10;    RAISE FORM_TRIGGER_FAILURE;&#10;  END IF;&#10;END;"/>
+        <Trigger Name="WHEN-VALIDATE-ITEM" Item="FECHA_FABRICACION" FireInQuery="false" DisplayInKeyboardHelp="true"
+          TriggerText="BEGIN&#10;  PCK_AUTOMOTOR.validar_fabricacion(:AUTOMOTOR.FECHA_FABRICACION);&#10;END;"/>
+        <Trigger Name="WHEN-BUTTON-PRESSED" Item="BTN_SAVE"
+          TriggerText="BEGIN&#10;  PCK_AUTOMOTOR.registrar_alta(&#10;    :AUTOMOTOR.DOMINIO,&#10;    :AUTOMOTOR.NUMERO_CHASIS,&#10;    :AUTOMOTOR.NUMERO_MOTOR,&#10;    :AUTOMOTOR.COLOR,&#10;    :AUTOMOTOR.FECHA_FABRICACION,&#10;    :AUTOMOTOR.CUIT_DUENIO&#10;  );&#10;  message('Automotor guardado con due&#241;o asignado');&#10;END;"/>
+        <Trigger Name="WHEN-BUTTON-PRESSED" Item="BTN_UPDATE"
+          TriggerText="BEGIN&#10;  PCK_AUTOMOTOR.actualizar(&#10;    :AUTOMOTOR.DOMINIO,&#10;    :AUTOMOTOR.NUMERO_CHASIS,&#10;    :AUTOMOTOR.NUMERO_MOTOR,&#10;    :AUTOMOTOR.COLOR,&#10;    :AUTOMOTOR.FECHA_FABRICACION,&#10;    :AUTOMOTOR.CUIT_DUENIO&#10;  );&#10;  message('Automotor actualizado');&#10;END;"/>
+        <Trigger Name="WHEN-BUTTON-PRESSED" Item="BTN_DELETE"
+          TriggerText="BEGIN&#10;  PCK_AUTOMOTOR.eliminar(:AUTOMOTOR.DOMINIO);&#10;  message('Automotor eliminado');&#10;END;"/>
+        <Trigger Name="WHEN-BUTTON-PRESSED" Item="BTN_LIST"
+          TriggerText="BEGIN&#10;  PCK_AUTOMOTOR.refrescar_listado;&#10;  message('Listado cargado (ver RG_AUTOS_DUENIO)');&#10;END;"/>
+      </Triggers>
+    </Block>
+  </Blocks>
+
+  <RecordGroups>
+    <RecordGroup Name="RG_AUTOS_DUENIO" QueryText="SELECT a.atr_dominio AS dominio, s.spo_cuit AS cuit, s.spo_denominacion AS duenio&#10;FROM &quot;Automotores&quot; a&#10;JOIN &quot;Objeto_De_Valor&quot; o ON o.ovp_id = a.atr_ovp_id&#10;LEFT JOIN &quot;Vinculo_Sujeto_Objeto&quot; v ON v.vso_ovp_id = o.ovp_id AND v.vso_responsable = 'S' AND v.vso_fecha_fin IS NULL&#10;LEFT JOIN &quot;Sujeto&quot; s ON s.spo_id = v.vso_spo_id&#10;ORDER BY a.atr_dominio"/>
+  </RecordGroups>
+
+  <ProgramUnits>
+    <ProgramUnit Name="PCK_AUTOMOTOR" UnitType="PLSQL"
+      ProgramText="PACKAGE BODY PCK_AUTOMOTOR IS&#10;&#10;  FUNCTION es_cuit_valido(p_cuit IN VARCHAR2) RETURN BOOLEAN IS&#10;    v_sum NUMBER := 0; v_coef SYS.OdciNumberList := SYS.OdciNumberList(5,4,3,2,7,6,5,4,3,2); v_dig NUMBER;&#10;  BEGIN&#10;    IF LENGTH(p_cuit) &lt;&gt; 11 OR REGEXP_INSTR(p_cuit, '^[0-9]{11}$') = 0 THEN RETURN FALSE; END IF;&#10;    FOR i IN 1..10 LOOP v_sum := v_sum + TO_NUMBER(SUBSTR(p_cuit,i,1))*v_coef(i); END LOOP;&#10;    v_dig := MOD(11 - MOD(v_sum,11),11); IF v_dig = 11 THEN v_dig := 0; END IF;&#10;    RETURN v_dig = TO_NUMBER(SUBSTR(p_cuit,11,1));&#10;  END;&#10;&#10;  PROCEDURE validar_dominio(p_dom IN VARCHAR2) IS&#10;  BEGIN&#10;    IF REGEXP_INSTR(p_dom, '^[A-Z]{3}[0-9]{3}$|^[A-Z]{2}[0-9]{3}[A-Z]{2}$') = 0 THEN&#10;      message('Dominio inv&#225;lido'); RAISE FORM_TRIGGER_FAILURE;&#10;    END IF;&#10;  END;&#10;&#10;  PROCEDURE validar_fabricacion(p_fab IN NUMBER) IS&#10;    v_y NUMBER; v_m NUMBER; v_now VARCHAR2(6) := TO_CHAR(SYSDATE,'YYYYMM');&#10;  BEGIN&#10;    IF p_fab IS NULL OR LENGTH(TO_CHAR(p_fab)) &lt;&gt; 6 THEN message('Fecha fabricaci&#243;n YYYYMM'); RAISE FORM_TRIGGER_FAILURE; END IF;&#10;    v_y := TO_NUMBER(SUBSTR(TO_CHAR(p_fab),1,4)); v_m := TO_NUMBER(SUBSTR(TO_CHAR(p_fab),5,2));&#10;    IF v_y &lt; 1900 OR v_m NOT BETWEEN 1 AND 12 OR TO_CHAR(p_fab) &gt; v_now THEN&#10;      message('Fecha fabricaci&#243;n inv&#225;lida'); RAISE FORM_TRIGGER_FAILURE;&#10;    END IF;&#10;  END;&#10;&#10;  FUNCTION obtener_denominacion(p_cuit IN VARCHAR2) RETURN VARCHAR2 IS&#10;    v_den VARCHAR2(160);&#10;  BEGIN&#10;    SELECT spo_denominacion INTO v_den FROM &quot;Sujeto&quot; WHERE spo_cuit = p_cuit;&#10;    RETURN v_den;&#10;  EXCEPTION WHEN NO_DATA_FOUND THEN RETURN NULL; END;&#10;&#10;  FUNCTION obtener_spo_id(p_cuit IN VARCHAR2) RETURN NUMBER IS&#10;    v_id NUMBER;&#10;  BEGIN&#10;    SELECT spo_id INTO v_id FROM &quot;Sujeto&quot; WHERE spo_cuit = p_cuit; RETURN v_id;&#10;  EXCEPTION WHEN NO_DATA_FOUND THEN RETURN NULL; END;&#10;&#10;  PROCEDURE registrar_alta(p_dom IN VARCHAR2, p_chasis IN VARCHAR2, p_motor IN VARCHAR2, p_color IN VARCHAR2, p_fab IN NUMBER, p_cuit IN VARCHAR2) IS&#10;    v_spo NUMBER; v_ovp NUMBER; v_atr NUMBER;&#10;  BEGIN&#10;    validar_dominio(p_dom);&#10;    validar_fabricacion(p_fab);&#10;    IF NOT es_cuit_valido(p_cuit) THEN message('CUIT inv&#225;lido'); RAISE FORM_TRIGGER_FAILURE; END IF;&#10;    v_spo := obtener_spo_id(p_cuit); IF v_spo IS NULL THEN message('No existe Sujeto con ese CUIT'); RAISE FORM_TRIGGER_FAILURE; END IF;&#10;&#10;    BEGIN&#10;      SELECT ovp_id INTO v_ovp FROM &quot;Objeto_De_Valor&quot; WHERE ovp_tipo='AUTOMOTOR' AND ovp_codigo = p_dom;&#10;    EXCEPTION WHEN NO_DATA_FOUND THEN&#10;      INSERT INTO &quot;Objeto_De_Valor&quot;(ovp_tipo, ovp_codigo, ovp_descripcion) VALUES('AUTOMOTOR', p_dom, 'Automotor '||p_dom) RETURNING ovp_id INTO v_ovp;&#10;    END;&#10;&#10;    BEGIN&#10;      SELECT atr_id INTO v_atr FROM &quot;Automotores&quot; WHERE atr_dominio = p_dom;&#10;      UPDATE &quot;Automotores&quot; SET atr_numero_chasis = p_chasis, atr_numero_motor = p_motor, atr_color = p_color, atr_fecha_fabricacion = p_fab WHERE atr_id = v_atr;&#10;    EXCEPTION WHEN NO_DATA_FOUND THEN&#10;      INSERT INTO &quot;Automotores&quot;(atr_ovp_id, atr_dominio, atr_numero_chasis, atr_numero_motor, atr_color, atr_fecha_fabricacion)&#10;      VALUES(v_ovp, p_dom, p_chasis, p_motor, p_color, p_fab) RETURNING atr_id INTO v_atr;&#10;    END;&#10;&#10;    UPDATE &quot;Vinculo_Sujeto_Objeto&quot; SET vso_fecha_fin = SYSDATE WHERE vso_ovp_id = v_ovp AND vso_responsable='S' AND vso_fecha_fin IS NULL;&#10;    INSERT INTO &quot;Vinculo_Sujeto_Objeto&quot;(vso_ovp_id, vso_spo_id, vso_tipo_vinculo, vso_porcentaje, vso_responsable, vso_fecha_inicio)&#10;    VALUES(v_ovp, v_spo, 'DUENO', 100, 'S', TRUNC(SYSDATE));&#10;  END;&#10;&#10;  PROCEDURE actualizar(p_dom IN VARCHAR2, p_chasis IN VARCHAR2, p_motor IN VARCHAR2, p_color IN VARCHAR2, p_fab IN NUMBER, p_cuit IN VARCHAR2) IS&#10;  BEGIN&#10;    registrar_alta(p_dom, p_chasis, p_motor, p_color, p_fab, p_cuit);&#10;  END;&#10;&#10;  PROCEDURE eliminar(p_dom IN VARCHAR2) IS&#10;    v_ovp NUMBER; v_atr NUMBER;&#10;  BEGIN&#10;    SELECT o.ovp_id, a.atr_id INTO v_ovp, v_atr&#10;    FROM &quot;Automotores&quot; a JOIN &quot;Objeto_De_Valor&quot; o ON o.ovp_id = a.atr_ovp_id&#10;    WHERE a.atr_dominio = p_dom;&#10;    DELETE FROM &quot;Vinculo_Sujeto_Objeto&quot; WHERE vso_ovp_id = v_ovp;&#10;    DELETE FROM &quot;Automotores&quot; WHERE atr_id = v_atr;&#10;    DELETE FROM &quot;Objeto_De_Valor&quot; WHERE ovp_id = v_ovp;&#10;  EXCEPTION WHEN NO_DATA_FOUND THEN&#10;    message('Dominio no encontrado'); RAISE FORM_TRIGGER_FAILURE;&#10;  END;&#10;&#10;  PROCEDURE refrescar_listado IS&#10;  BEGIN&#10;    NULL;&#10;  END;&#10;&#10;END;"/>
+  </ProgramUnits>
+</Form>
+
