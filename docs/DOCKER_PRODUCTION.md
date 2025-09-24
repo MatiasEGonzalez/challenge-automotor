@@ -8,14 +8,10 @@
 
 ## 🚀 One-Command Deployment:
 ```bash
-./deploy.sh  # or docker compose up -d --build
+docker compose up -d --build
 ```
 
-## 🛠️ Management Scripts:
-- `./start.sh` - Start all services
-- `./stop.sh` - Stop all services  
-- `./status.sh` - Check service status
-- `./logs.sh` - View service logs
+
 
 ## 🌐 Service Access:
 - **API**: http://localhost:3000
