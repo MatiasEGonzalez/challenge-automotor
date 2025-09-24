@@ -1,0 +1,95 @@
+<div class="listado-container">
+  <div class="page-header">
+    <h1 class="page-title">🚗 Sistema Automotor</h1>
+    <p class="page-subtitle">Gestión de automotores y dueños registrados</p>
+  </div>
+  
+  <div class="actions-bar">
+    <div>
+      <h2 class="mb-0" style="color: #495057; font-size: 1.5rem; font-weight: 600;">Listado de Automotores</h2>
+    </div>
+    <a class="btn-new-automotor" [routerLink]="['/formulario']">
+      <i class="fas fa-plus"></i>
+      Nuevo Automotor
+    </a>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p class="mt-3 text-muted">Cargando automotores...</p>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    <strong>Error:</strong> {{ error }}
+  </div>
+
+  <div class="table-container" *ngIf="!loading && !error">
+    <div class="table-responsive">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Dominio</th>
+            <th>Dueño</th>
+            <th>CUIT</th>
+            <th>Color</th>
+            <th>Fabricación</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let auto of automotores">
+            <td>
+              <span class="fw-bold text-primary">{{ auto.dominio }}</span>
+            </td>
+            <td>
+              <div *ngIf="auto.denominacion_dueno; else noDueno">
+                <strong>{{ auto.denominacion_dueno }}</strong>
+              </div>
+              <ng-template #noDueno>
+                <span class="badge badge-no-owner">Sin dueño</span>
+              </ng-template>
+            </td>
+            <td>
+              <span class="text-muted">{{ auto.cuit_dueno || '—' }}</span>
+            </td>
+            <td>
+              <span [class]="auto.color ? 'text-dark' : 'text-muted'">
+                {{ auto.color || '—' }}
+              </span>
+            </td>
+            <td>
+              <span class="badge badge-owner">{{ formatFecha(auto.fecha_fabricacion) }}</span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <a class="btn-action btn-edit" [routerLink]="['/formulario', auto.dominio]">
+                  <i class="fas fa-edit"></i>
+                  Editar
+                </a>
+                <button class="btn-action btn-delete" (click)="eliminar(auto.dominio)">
+                  <i class="fas fa-trash"></i>
+                  Eliminar
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="automotores.length === 0" class="empty-state">
+      <div class="empty-state-icon">🚗</div>
+      <h3 class="empty-state-title">No hay automotores registrados</h3>
+      <p class="empty-state-text">
+        Comienza registrando tu primer automotor en el sistema.<br>
+        Es rápido y fácil.
+      </p>
+      <a class="btn-new-automotor" [routerLink]="['/formulario']">
+        <i class="fas fa-plus"></i>
+        Registrar primer automotor
+      </a>
+    </div>
+  </div>
+</div>

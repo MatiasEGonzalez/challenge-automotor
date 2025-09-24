@@ -1,0 +1,206 @@
+<div class="form-container">
+  <div class="page-header">
+    <h1 class="page-title">
+      <span *ngIf="isEditMode">✏️ Editar Automotor</span>
+      <span *ngIf="!isEditMode">🚗 Nuevo Automotor</span>
+    </h1>
+    <p class="page-subtitle">
+      <span *ngIf="isEditMode">Actualiza los datos del automotor {{ dominioOriginal }}</span>
+      <span *ngIf="!isEditMode">Registra un nuevo automotor en el sistema</span>
+    </p>
+  </div>
+
+  <div class="form-card">
+    <div class="card-header-custom">
+      <h3 class="card-title-custom">
+        <i class="fas fa-car"></i>
+        {{ isEditMode ? 'Modificar Información' : 'Información del Vehículo' }}
+      </h3>
+    </div>
+    <div class="card-body-custom">
+          
+      <div *ngIf="loading" class="loading-overlay">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Procesando...</span>
+        </div>
+        <p class="loading-text">
+          {{ isEditMode ? 'Cargando datos del automotor...' : 'Procesando información...' }}
+        </p>
+      </div>
+
+      <div *ngIf="error" class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>{{ error }}</span>
+      </div>
+
+      <div *ngIf="success" class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span>{{ success }}</span>
+      </div>
+
+      <form [formGroup]="automotorForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
+        
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="dominio" class="form-label">
+                <i class="fas fa-id-card"></i>
+                Dominio <span class="required-asterisk">*</span>
+              </label>
+              <input 
+                type="text" 
+                class="form-control"
+                id="dominio"
+                formControlName="dominio"
+                [class.is-invalid]="automotorForm.get('dominio')?.invalid && automotorForm.get('dominio')?.touched"
+                placeholder="Ej: ABC123 o AB123CD"
+                maxlength="8"
+                style="text-transform: uppercase"
+                [readonly]="isEditMode">
+              <div class="invalid-feedback" *ngIf="automotorForm.get('dominio')?.invalid && automotorForm.get('dominio')?.touched">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ getErrorMessage('dominio') }}
+              </div>
+              <div class="form-text">
+                <i class="fas fa-info-circle"></i>
+                Formato argentino: AAA999 o AA999AA
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="fechaFabricacion" class="form-label">
+                <i class="fas fa-calendar-alt"></i>
+                Fecha Fabricación <span class="required-asterisk">*</span>
+              </label>
+              <input 
+                type="number" 
+                class="form-control"
+                id="fechaFabricacion"
+                formControlName="fechaFabricacion"
+                [class.is-invalid]="automotorForm.get('fechaFabricacion')?.invalid && automotorForm.get('fechaFabricacion')?.touched"
+                placeholder="202301"
+                min="190001"
+                max="999999">
+              <div class="invalid-feedback" *ngIf="automotorForm.get('fechaFabricacion')?.invalid && automotorForm.get('fechaFabricacion')?.touched">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ getErrorMessage('fechaFabricacion') }}
+              </div>
+              <div class="form-text">
+                <i class="fas fa-info-circle"></i>
+                Formato: YYYYMM (ej: 202301 = Enero 2023)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="numeroChasis" class="form-label">
+                <i class="fas fa-cogs"></i>
+                Número Chasis
+              </label>
+              <input 
+                type="text" 
+                class="form-control"
+                id="numeroChasis"
+                formControlName="numeroChasis"
+                placeholder="Número de chasis (opcional)"
+                maxlength="25">
+              <div class="form-text">
+                <i class="fas fa-info-circle"></i>
+                Campo opcional - identificador único del chasis
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="numeroMotor" class="form-label">
+                <i class="fas fa-engine"></i>
+                Número Motor
+              </label>
+              <input 
+                type="text" 
+                class="form-control"
+                id="numeroMotor"
+                formControlName="numeroMotor"
+                placeholder="Número de motor (opcional)"
+                maxlength="25">
+              <div class="form-text">
+                <i class="fas fa-info-circle"></i>
+                Campo opcional - identificador único del motor
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="color" class="form-label">
+                <i class="fas fa-palette"></i>
+                Color
+              </label>
+              <input 
+                type="text" 
+                class="form-control"
+                id="color"
+                formControlName="color"
+                placeholder="Color del vehículo (opcional)"
+                maxlength="40">
+              <div class="form-text">
+                <i class="fas fa-info-circle"></i>
+                Campo opcional - color principal del vehículo
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="cuitDuenio" class="form-label">
+                <i class="fas fa-user-tie"></i>
+                CUIT Dueño <span class="required-asterisk">*</span>
+              </label>
+              <input 
+                type="text" 
+                class="form-control"
+                id="cuitDuenio"
+                formControlName="cuitDuenio"
+                [class.is-invalid]="automotorForm.get('cuitDuenio')?.invalid && automotorForm.get('cuitDuenio')?.touched"
+                placeholder="20329642365"
+                maxlength="11">
+              <div class="invalid-feedback" *ngIf="automotorForm.get('cuitDuenio')?.invalid && automotorForm.get('cuitDuenio')?.touched">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ getErrorMessage('cuitDuenio') }}
+              </div>
+              <div class="form-text">
+                <i class="fas fa-info-circle"></i>
+                11 dígitos sin guiones - validación módulo 11
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-group-actions">
+          <a class="btn-back" (click)="volver()">
+            <i class="fas fa-arrow-left"></i>
+            Volver al Listado
+          </a>
+          
+          <button 
+            type="submit" 
+            class="btn-submit"
+            [disabled]="loading || !automotorForm.valid">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm"></span>
+            <i *ngIf="!loading" class="fas fa-save"></i>
+            <span>{{ isEditMode ? 'Actualizar Automotor' : 'Guardar Automotor' }}</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

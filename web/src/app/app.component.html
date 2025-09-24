@@ -1,0 +1,28 @@
+<nav class="navbar-modern">
+  <div class="nav-container">
+    <a class="navbar-brand-modern" [routerLink]="['/listado']">
+      <div class="brand-icon">
+        <i class="fas fa-car"></i>
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">Sistema Automotor</span>
+        <span class="brand-subtitle">Gestión Vehicular</span>
+      </div>
+    </a>
+    
+    <div class="nav-menu">
+      <a class="nav-item" [routerLink]="['/listado']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+        <i class="fas fa-list-ul"></i>
+        <span>Listado</span>
+      </a>
+      <a class="nav-item" [routerLink]="['/formulario']" routerLinkActive="active">
+        <i class="fas fa-plus-circle"></i>
+        <span>Nuevo</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<main class="main-content">
+  <router-outlet></router-outlet>
+</main>
