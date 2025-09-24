@@ -21,7 +21,7 @@ services:
       - automotor_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d automotor_db"]
-      interval: 30s
+      interval: 35s
       timeout: 10s
       retries: 3
 
@@ -48,9 +48,9 @@ services:
     networks:
       - automotor_network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health"]
-      interval: 15s
-      timeout: 5s
+      test: ["CMD", "wget", "--quiet", "--spider", "http://localhost:3000/health"]
+      interval: 35s
+      timeout: 10s
       retries: 5
       start_period: 30s
 
@@ -69,8 +69,8 @@ services:
     networks:
       - automotor_network
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:80 || exit 1"]
-      interval: 30s
+      test: ["CMD", "wget", "--quiet", "--spider", "http://localhost:80"]
+      interval: 35s
       timeout: 10s
       retries: 3
 
