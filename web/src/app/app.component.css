@@ -1,0 +1,133 @@
+/* Navbar moderna */
+.navbar-modern {
+  background: white;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+}
+
+.nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 70px;
+}
+
+.navbar-brand-modern {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: #495057;
+  transition: all 0.3s ease;
+}
+
+.navbar-brand-modern:hover {
+  color: #667eea;
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.brand-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.4rem;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #495057;
+  line-height: 1.2;
+}
+
+.brand-subtitle {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #6c757d;
+  line-height: 1;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #6c757d;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-item:hover {
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.nav-item.active {
+  color: white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.nav-item i {
+  font-size: 1rem;
+}
+
+.main-content {
+  min-height: calc(100vh - 70px);
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nav-container {
+    padding: 0 1rem;
+  }
+  
+  .brand-text {
+    display: none;
+  }
+  
+  .nav-item span {
+    display: none;
+  }
+  
+  .nav-item {
+    padding: 0.8rem;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    justify-content: center;
+  }
+}
